@@ -19,6 +19,7 @@ class Profiles(db.Model):
     password = db.Column(db.String(100), unique=False, nullable=False)
     email = db.Column(db.String(30), nullable=False)
     balance = db.Column(db.String(30), nullable=False, unique=False)
+    attendance = db.Column(db.String(30), nullable=False, unique=False)
 
     def __init__(self, username, first_name, last_name, password, email):
         self.username = username
@@ -27,7 +28,8 @@ class Profiles(db.Model):
         self.password = password
         self.email = email
         self.attendance = 0
-        self.balance = "032"
+        self.balance = 10
+        self.settings = UserSettings()
 
     def check_password(self, password):
         return self.password == password
@@ -38,6 +40,16 @@ class Profiles(db.Model):
   
     def getUsername(self):
         return self.usernaame
+    
+class UserSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('profiles.username'), nullable=False)
+    user = db.relationship('Profiles', back_populates='settings')
+    notifications = db.Column(db.Boolean, default=True)
+    theme = db.Column(db.String(20), default='light')
+
+Profiles.settings = db.relationship('UserSettings', back_populates='user', uselist=False, cascade="all, delete-orphan")
+
 
 admin.add_view(ModelView(Profiles, db.session))
 
@@ -62,6 +74,7 @@ def login():
             session['username'] = user.username  
             session['email'] = user.email 
             session['balance'] = user.balance
+            session['attendance'] = user.attendance
             flash('You were successfully logged in')
             return redirect(url_for('home'))
     return render_template('login.html')
@@ -78,26 +91,47 @@ def signup():
                 flash("User already exists.")
             else:
                 profile = Profiles(request.form['new_username'], request.form['first_name'], request.form['last_name'], request.form['new_password'], request.form['email'])
+                profile.settings = UserSettings()
                 db.session.add(profile)
                 db.session.commit()
                 return redirect(url_for('login'))
             
     return render_template('signup.html')
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    username= session.get('username')
-    
-    return render_template('settings.html', username=username)
-
-"""@app.route('/balance')
-def balance():
-    user = Profiles.query.filter_by(username=session['username']).first()
-    if user:
-        return render_template('balance.html', balance=user.balance)
+    username = session.get('username')
+    if username:
+        user = Profiles.query.filter_by(username=username).first()
+        if request.method == 'POST':
+            # Example: Update theme
+            user.settings.theme = request.form['theme']
+            db.session.commit()
+            flash('Settings updated successfully.')
+            return redirect(url_for('settings'))
+        return render_template('settings.html', username=username, theme=user.settings.theme)
     else:
         return redirect(url_for('login'))
 
+    
+   
+@app.route('/balance', methods=['GET', 'POST'])
+def balance():
+    username= session.get('username')
+    email = session.get('email')
+    balance = session.get('balance')
+    
+    if request.method == 'POST':
+        request.form['balance']
+    
+        if username:
+            return render_template('balance.html', balance=balance)
+        else:
+            print("hi")
+    
+    return redirect(url_for('login'))
+
+"""
 @app.route('/attendance')
 def attendance():
    def attendance():
@@ -110,7 +144,8 @@ def attendance():
         return render_template('attendance.html', attendance=user.attendance)
     else:
         flash('User not found.')
-        return redirect(url_for('login'))"""
+        return redirect(url_for('login'))
+"""
 
 
 

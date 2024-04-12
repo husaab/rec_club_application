@@ -6,6 +6,13 @@
 </head>
 <body>
     <div>
-        hello, {{ username }} 
+        <h1> Settings </h1>
+        <h3> Hello, {{ username}} </h3>
+        <form method="post" action="{{ url_for('settings') }}">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" value="Current username: {{ username }}">
+            <button type="submit">Update</button>
+        </form>
+    
     </div>
 </body>
