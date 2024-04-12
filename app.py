@@ -18,6 +18,7 @@ class Profiles(db.Model):
     last_name = db.Column(db.String(20), unique=False, nullable=False)
     password = db.Column(db.String(100), unique=False, nullable=False)
     email = db.Column(db.String(30), nullable=False)
+    balance = db.Column(db.String(30), nullable=False, unique=False)
 
     def __init__(self, username, first_name, last_name, password, email):
         self.username = username
@@ -26,7 +27,7 @@ class Profiles(db.Model):
         self.password = password
         self.email = email
         self.attendance = 0
-        self.balance = 0
+        self.balance = "032"
 
     def check_password(self, password):
         return self.password == password
@@ -47,8 +48,9 @@ def welcome():
 @app.route('/home')
 def home():
     username= session.get('username')
-
-    return render_template('home.html', username=username)
+    email = session.get('email')
+    balance = session.get('balance')
+    return render_template('home.html', username=username, email=email, balance=balance)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -59,6 +61,7 @@ def login():
         else:
             session['username'] = user.username  
             session['email'] = user.email 
+            session['balance'] = user.balance
             flash('You were successfully logged in')
             return redirect(url_for('home'))
     return render_template('login.html')
@@ -87,7 +90,7 @@ def settings():
     
     return render_template('settings.html', username=username)
 
-""" @app.route('/balance')
+"""@app.route('/balance')
 def balance():
     user = Profiles.query.filter_by(username=session['username']).first()
     if user:
