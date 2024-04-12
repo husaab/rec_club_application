@@ -1,7 +1,7 @@
 # rec_club_application
 A Recreational Club Membership application created in Java
 
-Authors: Daniel Pinnock, Hussein Saab, Joseph Hennok, Dev Patel
+Authors: Daniel Pinnock, Hussein Saab, Joseph Hennok, Dev Patel, Hamza Hussein
 
 The following application was designed to keep track of finances of a recreational club and for each member involved in the club. Moreover, the app allows customers to create an account, delete their account, edit their account information, and pay their fees for each practice directly through the app. Coaches of the club are able to manually add or remove customers themselves, and send reminders/notifications to customers about upcoming practices to customers who wish to receive them. Additionally, customers who haven’t paid their fees for an extended period will be notified by the coach about their outstanding balance regardless if they wish to receive notifications or not. The treasurer of the club will be able to manage all the finances of the club directly through the app by receiving a pdf file of the balance sheet of the club outlining all of the revenues and expenses in the club along with payments that need to be made to the coaches of the club.
 
