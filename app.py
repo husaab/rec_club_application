@@ -27,6 +27,7 @@ class Profiles(db.Model):
         self.last_name = last_name
         self.password = password
         self.email = email
+        self.balance = 0
 
     def check_password(self, password):
         return self.password == password
