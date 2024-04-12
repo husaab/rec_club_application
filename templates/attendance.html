@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <link href="{{ url_for('static', filename='home.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>Attendance</h1>
+
+    <h2>Players</h2>
+    <p>Attendance Count for Players: {{ player_attendance }}</p>
+    <form action="{{ url_for('mark_player_attendance') }}" method="POST">
+        <button type="submit">Mark Player Attendance</button>
+    </form>
+
+    <h2>Coaches</h2>
+    <p>Attendance Count for Coaches: {{ coach_attendance }}</p>
+    <form action="{{ url_for('mark_coach_attendance') }}" method="POST">
+        <button type="submit">Mark Coach Attendance</button>
+    </form>
+</body>
+</html>

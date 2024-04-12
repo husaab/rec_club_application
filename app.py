@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = 'abcdefghijklmnopqrstuvwxyz'
 
 db = SQLAlchemy(app)
+admin = Admin(app, name='MicroAdmin', template_mode='bootstrap3')
 
 # Models
 class Profiles(db.Model):
@@ -15,11 +18,6 @@ class Profiles(db.Model):
     last_name = db.Column(db.String(20), unique=False, nullable=False)
     password = db.Column(db.String(100), unique=False, nullable=False)
     email = db.Column(db.String(30), nullable=False)
- 
-    # repr method represents how one object of this datatable
-    # will look like
-    #def __repr__(self):
-    #    return f"Username: {self.username} Name : {self.first_name, self.last_name}, Email: {self.email}"
 
     def __init__(self, username, first_name, last_name, password, email):
         self.username = username
@@ -27,26 +25,44 @@ class Profiles(db.Model):
         self.last_name = last_name
         self.password = password
         self.email = email
+        self.attendance = 0
         self.balance = 0
 
     def check_password(self, password):
         return self.password == password
+    
+    def getBalance(self):
+        return self.balance
+    
+  
+    def getUsername(self):
+        return self.usernaame
+
+admin.add_view(ModelView(Profiles, db.session))
 
 @app.route('/')
+def welcome():
+    return render_template('login.html', Profiles = Profiles.query.all() )
+
+@app.route('/home')
 def home():
-    return render_template('home.html', Profiles = Profiles.query.all() )
+    username= session.get('username')
+
+    return render_template('home.html', username=username)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
     if request.method == 'POST':
-        username = Profiles.query.filter_by(username=request.form['username']).first()
-        if username is None or not username.check_password(request.form['password']):
-            error = 'Invalid Credentials. Please try again.'
+        user = Profiles.query.filter_by(username=request.form['username']).first()
+        if user is None or not user.check_password(request.form['password']):
+            flash('Invalid Credentials. Please try again.')
         else:
+            session['username'] = user.username  
+            session['email'] = user.email 
             flash('You were successfully logged in')
             return redirect(url_for('home'))
-    return render_template('login.html', error=error)
+    return render_template('login.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -61,12 +77,38 @@ def signup():
                 profile = Profiles(request.form['new_username'], request.form['first_name'], request.form['last_name'], request.form['new_password'], request.form['email'])
                 db.session.add(profile)
                 db.session.commit()
-        # Here, insert code to handle the sign-up form submission.
-        # This could involve validating the form data, checking if the
-        # username is already taken, and storing the new user's information
-        # in the database.
                 return redirect(url_for('login'))
+            
     return render_template('signup.html')
+
+@app.route('/settings')
+def settings():
+    username= session.get('username')
+    
+    return render_template('settings.html', username=username)
+
+""" @app.route('/balance')
+def balance():
+    user = Profiles.query.filter_by(username=session['username']).first()
+    if user:
+        return render_template('balance.html', balance=user.balance)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/attendance')
+def attendance():
+   def attendance():
+    if 'username' not in session:
+        flash('Please log in to view attendance.')
+        return redirect(url_for('login'))
+    
+    user = Profiles.query.filter_by(username=session['username']).first()
+    if user:
+        return render_template('attendance.html', attendance=user.attendance)
+    else:
+        flash('User not found.')
+        return redirect(url_for('login'))"""
+
 
 
 if __name__ == '__main__':
