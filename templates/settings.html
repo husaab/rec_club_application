@@ -3,16 +3,105 @@
 <head>
     <title>Settings</title>
     <link href="{{ url_for('static', filename='home.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='home.css') }}" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/home">Recreational Club</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/balance">Balance</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/attendance">Attendance</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/login">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    <div class="main">
         <h1> Settings </h1>
-        <h3> Hello, {{ username}} </h3>
+
         <form method="post" action="{{ url_for('settings') }}">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" value="Current username: {{ username }}">
-            <button type="submit">Update</button>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ username }}" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required value="#####">
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ email }}" required>
+            </div>
+            <input type="hidden" name="action" value="update">
+            <button type="submit" class="login-button">Update</button>
         </form>
+        <form method="post" action="{{ url_for('settings') }}">
+          <input type="hidden" name="action" value="delete"> 
+          <button type="submit" class="input" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">Delete Account</button>
+      </form>
+          
+          
+    
+     
+
     
     </div>
+
+    <style>
+
+        .main{
+            margin: 0 auto;
+            border: 1px solid black;
+            max-width: 600px;
+            margin-top: 60px;
+            padding: 50px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Makes sure the padding doesn't affect the final computed width of the input */
+        }
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .balance{
+            text-decoration: underline;
+        }
+
+    </style>
 </body>

@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, current_app
+import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -6,9 +7,10 @@ from flask_admin.contrib.sqla import ModelView
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = 'abcdefghijklmnopqrstuvwxyz'
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
 db = SQLAlchemy(app)
-admin = Admin(app, name='MicroAdmin', template_mode='bootstrap3')
+admin = Admin(app, name='TAdmin', template_mode='bootstrap3')
 
 # Models
 class Profiles(db.Model):
@@ -34,13 +36,6 @@ class Profiles(db.Model):
     def check_password(self, password):
         return self.password == password
     
-    def getBalance(self):
-        return self.balance
-    
-  
-    def getUsername(self):
-        return self.usernaame
-    
 class UserSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('profiles.username'), nullable=False)
@@ -50,12 +45,12 @@ class UserSettings(db.Model):
 
 Profiles.settings = db.relationship('UserSettings', back_populates='user', uselist=False, cascade="all, delete-orphan")
 
-
 admin.add_view(ModelView(Profiles, db.session))
 
 @app.route('/')
 def welcome():
     return render_template('login.html', Profiles = Profiles.query.all() )
+
 
 @app.route('/home')
 def home():
@@ -101,51 +96,85 @@ def signup():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     username = session.get('username')
-    if username:
-        user = Profiles.query.filter_by(username=username).first()
-        if request.method == 'POST':
-            # Example: Update theme
-            user.settings.theme = request.form['theme']
-            db.session.commit()
-            flash('Settings updated successfully.')
-            return redirect(url_for('settings'))
-        return render_template('settings.html', username=username, theme=user.settings.theme)
-    else:
+    if not username:
+        flash('Please log in to access settings.', 'error')
         return redirect(url_for('login'))
 
+    user = Profiles.query.filter_by(username=username).first()
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+
+            action = request.form.get('action')
+            if action == 'update':
     
-   
+                new_username = request.form.get('username')
+                new_email = request.form.get('email')
+
+                if new_username:
+                    user.username = new_username
+                    session['username'] = new_username
+                
+                if new_email:
+                    user.email = new_email
+                    session['email'] = new_email
+
+                db.session.commit()
+                flash('Settings updated successfully.', 'success')
+                return redirect(url_for('settings'))
+            
+            elif action == 'delete':
+                 
+                db.session.delete(user)
+                db.session.commit()
+                flash('Your account has been deleted.', 'success')
+                session.clear() 
+                return redirect(url_for('login'))
+
+
+    return render_template('settings.html', username=user.username, email=user.email)
+        
+
+    
+        
+
+
+ 
+
 @app.route('/balance', methods=['GET', 'POST'])
 def balance():
     username= session.get('username')
     email = session.get('email')
     balance = session.get('balance')
-    
-    if request.method == 'POST':
-        request.form['balance']
-    
-        if username:
-            return render_template('balance.html', balance=balance)
-        else:
-            print("hi")
-    
-    return redirect(url_for('login'))
 
-"""
+    user = Profiles.query.filter_by(username=username).first()
+
+    if request.method == 'POST':
+        card = request.form['card']
+        CVV = request.form['CVV']
+        expiry = request.form['expiry']
+        newbalance = request.form.get('balance')
+        if newbalance:
+                user.balance = int(user.balance) + int(newbalance)
+                session['balance'] = str(int(user.balance))
+        db.session.commit()
+        return redirect(url_for('balance'))
+    
+    return render_template('balance.html', balance=balance)
+
+
+
+  
+
+
 @app.route('/attendance')
 def attendance():
-   def attendance():
-    if 'username' not in session:
-        flash('Please log in to view attendance.')
-        return redirect(url_for('login'))
     
-    user = Profiles.query.filter_by(username=session['username']).first()
-    if user:
-        return render_template('attendance.html', attendance=user.attendance)
-    else:
-        flash('User not found.')
-        return redirect(url_for('login'))
-"""
+    attendance = session.get('attendance')    
+    return render_template('attendance.html', attendance=attendance)
+    
 
 
 
